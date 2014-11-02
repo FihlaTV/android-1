@@ -38,13 +38,13 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity implements LocationListener {
 
+    Marker marker = null, locMarker = null;
+
     private LocationManager locationManager;
     private String provider;
 
     public double latitude, longitude;
 
-
-    private LatLng CUR_LOCATION;
     private GoogleMap map;
 
     JSONObject mapJSON;
@@ -77,17 +77,16 @@ public class MainActivity extends Activity implements LocationListener {
         } else {
         }
 
-        CUR_LOCATION = new LatLng(location.getLatitude(), location.getLongitude());
-
 
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
                 .getMap();
-        Marker aMarker = map.addMarker(new MarkerOptions().position(CUR_LOCATION)
+        Marker locMarker = map.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude))
                 .title("Your Location"));
 
 
+
         // Move the camera instantly to hamburg with a zoom of 15.
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(CUR_LOCATION, 30));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 35));
 
         // Zoom in, animating the camera.
         map.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
@@ -97,9 +96,10 @@ public class MainActivity extends Activity implements LocationListener {
             @Override
             public void onMapClick(LatLng point) {
                 // TODO Auto-generated method stub
-                map.addMarker(new MarkerOptions().position(point));
+                if (marker != null) marker.remove();
+                Marker marker = map.addMarker(new MarkerOptions().position(point));
 
-                getDirectionObject(CUR_LOCATION.latitude, CUR_LOCATION.longitude, point.latitude, point.longitude);
+                getDirectionObject(latitude, longitude, point.latitude, point.longitude);
             }
         });
     }
@@ -155,9 +155,12 @@ public class MainActivity extends Activity implements LocationListener {
                 URL right = null;
                 try
                 {
-                    left = new URL("http://172.26.2.145:1337/1");
-                    right = new URL("http://172.26.2.145:1337/2");
-                    forward = new URL("http://172.26.2.145:1337/0");
+                    //left = new URL("http://172.26.2.145:1337/1");
+                    //right = new URL("http://172.26.2.145:1337/2");
+                    //forward = new URL("http://172.26.2.145:1337/0");
+                    forward = new URL("http://192.168.42.1:1337/0");
+                    left = new URL("http://192.168.42.1:1337/1");
+                    right = new URL("http://192.168.42.1:1337/2");
                 } catch (MalformedURLException e)
                 {
                 }
@@ -173,10 +176,10 @@ public class MainActivity extends Activity implements LocationListener {
 
                     Location location = locationManager.getLastKnownLocation(provider);
                     LatLng step = stepByStep.get(currentStep);
-                    if (Math.sqrt(Math.abs(location.getLatitude() - step.latitude)) +
-                            Math.sqrt(Math.abs(location.getLongitude() - step.longitude)) < 0.07) { // if it's close enough
-                        if (Math.sqrt(Math.abs(location.getLatitude() - step.latitude)) +
-                                Math.sqrt(Math.abs(location.getLongitude() - step.longitude)) < 0.001)
+                    if (Math.sqrt(Math.abs(latitude - step.latitude)) +
+                            Math.sqrt(Math.abs(longitude - step.longitude)) < 0.07) { // if it's close enough
+                        if (Math.sqrt(Math.abs(latitude - step.latitude)) +
+                                Math.sqrt(Math.abs(longitude - step.longitude)) < 0.001)
                             currentStep++;
 
                         //code left
@@ -186,12 +189,12 @@ public class MainActivity extends Activity implements LocationListener {
 
                         }
                         //code right
-                        else if (intDirections.get(currentStep + 1) - intDirections.get(currentStep) < 20) {
+                        else if (intDirections.get(currentStep + 1) - intDirections.get(currentStep) < -20) {
                             System.out.println("r");
                             sendRequest(right);
                         }
                         //code forward
-                        if (Math.abs(intDirections.get(currentStep + 1) - intDirections.get(currentStep)) <= 20) {
+                        else if (Math.abs(intDirections.get(currentStep + 1) - intDirections.get(currentStep)) <= 20) {
                             System.out.println("f");
                             sendRequest(forward);
                         }
@@ -236,6 +239,12 @@ public class MainActivity extends Activity implements LocationListener {
     public void onLocationChanged(Location location) {
         latitude = location.getLatitude();
         longitude = location.getLongitude();
+
+        if (locMarker != null) locMarker.remove();
+        map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
+                    .getMap();
+        locMarker = map.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude))
+                    .title("Your Location"));
     }
 
     @Override
