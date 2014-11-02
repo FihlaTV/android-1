@@ -162,15 +162,22 @@ public class MainActivity extends Activity implements LocationListener {
                 {
                 }
 
-
                 while (true)
 
                 {
+                    // Break for end of destination
+                    if (currentStep == stepByStep.size())
+                    {
+                        break;
+                    }
+
                     Location location = locationManager.getLastKnownLocation(provider);
                     LatLng step = stepByStep.get(currentStep);
-                    if (Math.sqrt(location.getLatitude() - step.latitude) +
-                            Math.sqrt(location.getLongitude() - step.longitude) < 0.1) { // if it's close enough
-                        currentStep++;
+                    if (Math.sqrt(Math.abs(location.getLatitude() - step.latitude)) +
+                            Math.sqrt(Math.abs(location.getLongitude() - step.longitude)) < 0.07) { // if it's close enough
+                        if (Math.sqrt(Math.abs(location.getLatitude() - step.latitude)) +
+                                Math.sqrt(Math.abs(location.getLongitude() - step.longitude)) < 0.001)
+                            currentStep++;
 
                         //code left
                         if (intDirections.get(currentStep + 1) - intDirections.get(currentStep) > 20) {
