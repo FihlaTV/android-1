@@ -68,8 +68,6 @@ public class MainActivity extends Activity implements LocationListener {
         provider = locationManager.getBestProvider(criteria, false);
         Location location = locationManager.getLastKnownLocation(provider);
 
-
-
         // Initialize the location fields
         if (location != null) {
             System.out.println("Provider " + provider + " has been selected.");
@@ -77,10 +75,9 @@ public class MainActivity extends Activity implements LocationListener {
         } else {
         }
 
-
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
                 .getMap();
-        Marker locMarker = map.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude))
+        locMarker = map.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude))
                 .title("Your Location"));
 
 
@@ -97,7 +94,7 @@ public class MainActivity extends Activity implements LocationListener {
             public void onMapClick(LatLng point) {
                 // TODO Auto-generated method stub
                 if (marker != null) marker.remove();
-                Marker marker = map.addMarker(new MarkerOptions().position(point));
+                marker = map.addMarker(new MarkerOptions().position(point));
 
                 getDirectionObject(latitude, longitude, point.latitude, point.longitude);
             }
